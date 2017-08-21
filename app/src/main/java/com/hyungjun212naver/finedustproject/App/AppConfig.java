@@ -5,7 +5,7 @@ package com.hyungjun212naver.finedustproject.App;
  */
 
 public class AppConfig {
-    public static String IP = "221.148.116.6";
+    public static String IP = "172.30.1.25";
     public static String SERVICE_KEY = "ssW23XVqj7zYinUM1xK3frFatigBeIMaYxmU1T8Av2R1%2FJI7TT%2F556f4nbWLVA4%2FslXiTzGaWK40yfkC%2FMLFXg%3D%3D";
 //    public static String SERVICE_KEY = "Pzx5LUDZZTs8Aw41dt474IEqlitcRQ%2BTYW5dCamWML4pyGghh5Vth%2B3VCAMjP07fjJVnPmK%2Bm%2B5SV9ikZiJYwg%3D%3D";
     public static String URL_LOGIN = "http://"+IP+"/AD_Project/login.php";

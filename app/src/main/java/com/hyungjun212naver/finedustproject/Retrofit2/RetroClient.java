@@ -1,7 +1,5 @@
 package com.hyungjun212naver.finedustproject.Retrofit2;
 
-import android.util.Log;
-
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -23,7 +21,6 @@ public class RetroClient {
     }
 
     public static RetrofitService getStationListService(){
-        Log.e("searchStation_url", RetrofitService.StationList_URL);
         return getRetrofitInstance(RetrofitService.StationList_URL).create(RetrofitService.class);
     }
 

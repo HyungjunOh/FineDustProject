@@ -1,13 +1,107 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hyungjun212naver.finedustproject.Fragment.BeaconSrcFragment">
 
+
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="beaconsrc_fragment" />
+        android:background="@color/bg_login"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/add_location_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@color/bg_register"
+            android:paddingTop="5dp"
+            android:text="실내비콘검색"
+            android:textAlignment="center"
+            android:textColor="@color/base_white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/bg_register"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/beaconSrc_loc_eT"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:background="@color/input_register"
+                android:ems="10"
+                android:hint="원하는 장소"
+                android:inputType="textPersonName"
+                android:singleLine="false"
+                android:text="스타벅스"
+                android:textColor="@color/base_white"
+                android:textColorHint="@color/base_white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/beaconSrc_loc_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_toEndOf="@+id/beaconSrc_loc_eT"
+                android:layout_toRightOf="@+id/beaconSrc_loc_eT"
+                android:layout_weight="1"
+                android:background="#ea4c88"
+                android:text="입력"
+                android:textColor="@color/base_white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:background="@color/bg_register">
+
+
+            <TextView
+                android:id="@+id/add_location_title_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="5dp"
+                android:text="실내비콘목록"
+                android:textColor="@color/base_white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/beaconSrc_rcView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/add_location_title_2"
+                app:layoutManager="LinearLayoutManager" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
 
 </FrameLayout>
