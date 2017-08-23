@@ -37,7 +37,7 @@ public class BeaconSrcAdapter extends RecyclerView.Adapter<BeaconSrcAdapter.Hold
     public void setBeaconSrcList(List<BeaconStation> beaconStations){
         beaconStationList.clear();
         beaconStationList.addAll(beaconStations);
-        this.notifyItemRangeInserted(0, beaconStations.size()-1);
+        this.notifyItemRangeInserted(0, beaconStations.size());
     }
 
     public void setLinearLayoutManager(LinearLayoutManager linearLayoutManager){

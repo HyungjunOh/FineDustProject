@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -108,17 +107,6 @@ public class BeaconSrcFragment extends Fragment {
 
                 getBeaconAirValue(beaconStationArrayList.get(position).getId());
 
-
-//                String mktListDetail_ID = String.valueOf(mktListDataArrayList.get(position).getMktWriteID());
-//                String product_NM = mktListDataArrayList.get(position).getProductNM();
-//
-//                Intent intent = new Intent(getContext(), MktDDActivity.class);
-//                intent.putExtra("id", mktListDetail_ID);
-//                intent.putExtra("product", product_NM);
-//                intent.putExtra("id_array", mkt_ID);
-//                startActivity(intent);
-
-
             }
         });
     }
@@ -138,11 +126,6 @@ public class BeaconSrcFragment extends Fragment {
                     beaconStationArrayList = response.body().getBeaconStations();
 
                     mAdapter.setBeaconSrcList(beaconStationArrayList);
-
-                    String test = response.body().getBeaconStations().get(0).getLocationName();
-
-                    Log.e("test", test);
-
 
                 } else {
                     Toast.makeText(getContext(), "worng", Toast.LENGTH_SHORT).show();
