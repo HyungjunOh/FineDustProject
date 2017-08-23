@@ -5,6 +5,8 @@ import com.hyungjun212naver.finedustproject.Bean.AirValueJSON;
 import com.hyungjun212naver.finedustproject.Bean.BeaconAirValue;
 import com.hyungjun212naver.finedustproject.Bean.BeaconLocation;
 import com.hyungjun212naver.finedustproject.Bean.GpsToAddr;
+import com.hyungjun212naver.finedustproject.Bean.LatestBeaconData;
+import com.hyungjun212naver.finedustproject.Bean.LatestStationData;
 import com.hyungjun212naver.finedustproject.Bean.StationList;
 
 import retrofit2.Call;
@@ -36,4 +38,10 @@ public interface RetrofitService {
 
     @GET("/FineDustProject/beacon_data.php")
     Call<BeaconAirValue> getBeacon_AirValue(@Query("beacon_id") String beacon_id, @Query("count") String count);
+
+    @GET("/FineDustProject/latest_beacon_airvalue.php")
+    Call<LatestBeaconData> getLatest_BeaconData();
+
+    @GET("/FineDustProject/latest_station_airvalue.php")
+    Call<LatestStationData> getLatestStationData_AirValue();
 }
