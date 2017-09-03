@@ -145,7 +145,6 @@ public class RegisterActivity extends Activity {
                 params.put("name",name);
                 params.put("email",email);
                 params.put("password",password);
-//                params.put("yn",yn);
                 return params;
             }
         };

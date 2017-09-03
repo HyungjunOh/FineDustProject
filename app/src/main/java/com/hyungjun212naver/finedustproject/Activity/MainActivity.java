@@ -3,6 +3,7 @@ package com.hyungjun212naver.finedustproject.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -27,9 +28,25 @@ import com.hyungjun212naver.finedustproject.Helper.SQLiteHandler;
 import com.hyungjun212naver.finedustproject.Helper.SessionManager;
 import com.hyungjun212naver.finedustproject.R;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
+import java.util.Collection;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity {
+import static com.hyungjun212naver.finedustproject.App.AppConfig.BEACON_STATE;
+import static com.hyungjun212naver.finedustproject.App.AppConfig.LOGIN_EMAIL;
+import static com.hyungjun212naver.finedustproject.App.AppConfig.LOGIN_NAME;
+import static com.hyungjun212naver.finedustproject.App.AppConfig.LOGIN_STATE;
+
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -55,11 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] activityTitles;
 
-//    public static String LOGINSTATE = Constants.LOGIN.LOGINFAIL;
-    private static String USER_ID = null;
-    private static String LOGIN_ID;
-
-
     // flag to load home fragment when user presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
@@ -67,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
     //login session
     private SessionManager session;
     private SQLiteHandler db;
+
+    //Beacon
+    private BeaconManager beaconManager;
+    Identifier defaultUUID = Identifier.parse("aaaaaaaa-bbbb-bbbb-cccc-ccccdddddddd");
+
+    public static String UUID;
+    public static String Major;
+    public static String Minor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +97,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMainActivity(Bundle savedInstanceState){
+
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+        Region region = new Region("backgroundRegion", defaultUUID, null, null);
+        beaconManager.getBeaconParsers()
+                .add((new BeaconParser()
+                        .setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")));
+
+        beaconManager.bind(this);
 
         countBackFlag = 0;
 
@@ -99,16 +128,17 @@ public class MainActivity extends AppCompatActivity {
         db = new SQLiteHandler(getApplicationContext());
 
         if(session.isLoggedIn()){
+            LOGIN_STATE = true;
+
             Toast.makeText(this,"Loggedin",Toast.LENGTH_LONG).show();
             navigationView.removeHeaderView(navHeader);
             View view2 = navigationView.inflateHeaderView(R.layout.nav_header_logged);
 
             TextView nav_name_textView = (TextView)view2.findViewById(R.id.nav_name_textView);
             HashMap<String,String> user = db.getUserDetails();
-            String name = "";
-            name = user.get("name");
-
-            nav_name_textView.setText(name+" 님");
+            LOGIN_NAME = user.get("name");
+            LOGIN_EMAIL = user.get("email");
+            nav_name_textView.setText(LOGIN_NAME+" 님");
         }
 
         activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
@@ -194,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment getHomeFragment() {
         switch (navItemIndex) {
-
             case 0:
                 HomeFragment homeFragment = new HomeFragment();
                 return homeFragment;
@@ -231,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
     private void setToolbarTitle() {
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
 //        toolbar.setTitle(activityTitles[navItemIndex]);
-
     }
 
     private void selectNavMenu() {
@@ -244,7 +272,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-
 
                 switch (menuItem.getItemId()) {
 
@@ -305,7 +332,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onDrawerOpened(drawerView);
             }
         };
-
 
         drawer.setDrawerListener(actionBarDrawerToggle);
 
@@ -368,18 +394,73 @@ public class MainActivity extends AppCompatActivity {
 //        loadHomeFragment();
 //    }
 
+    //로그인 버튼 클릭 Action
     public void nav_login_button_clicked(View view){
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 
+    //로그아웃 버튼 클릭 Action
     public void nav_logout_button_clicked(View view){
         session.setLogin(false);
         db.deleteUsers();
+        LOGIN_STATE = true;
+        LOGIN_NAME = null;
+        LOGIN_EMAIL = null;
         Toast.makeText(getApplicationContext(), "Logout user!", Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBeaconServiceConnect() {
+
+        beaconManager.setRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (beacons.size() > 0) {
+                    BEACON_STATE = true;
+                    Log.e("BEACON_STATE", "TRUE");
+
+                    Log.e(TAG, "--------------------------------------------------------------------------------");
+                    Log.i(TAG, "Distance : "+beacons.iterator().next().getDistance()+"(meter)");
+                    UUID = beacons.iterator().next().getId1().toString();
+                    Log.i(TAG, "UUID : "+UUID);
+                    Major = beacons.iterator().next().getId2().toString();
+                    Log.i(TAG, "Major : "+Major);
+                    Minor = beacons.iterator().next().getId3().toString();
+                    Log.i(TAG, "Minor : "+Minor);
+                    Log.e(TAG, "--------------------------------------------------------------------------------");
+                } else {
+                    BEACON_STATE = false;
+                    Log.e("BEACON_STATE", "FALSE");
+                }
+            }
+        });
+        try{
+            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", defaultUUID, null, null));
+        }catch(RemoteException e){
+
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(false);
     }
 
     public void opt2clicked(){
@@ -388,7 +469,10 @@ public class MainActivity extends AppCompatActivity {
         loadHomeFragment();
     }
 
-    public static String getLOGIN_ID(){
-        return LOGIN_ID;
+    public static String getLOGIN_NAME(){
+        return LOGIN_NAME;
+    }
+    public static String getLOGIN_EMAIL(){
+        return LOGIN_EMAIL;
     }
 }

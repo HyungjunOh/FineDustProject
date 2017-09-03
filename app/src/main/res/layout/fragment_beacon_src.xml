@@ -5,10 +5,6 @@
     android:layout_height="match_parent"
     tools:context="com.hyungjun212naver.finedustproject.Fragment.BeaconSrcFragment">
 
-
-    <!-- TODO: Update blank fragment layout -->
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

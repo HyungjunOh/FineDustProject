@@ -19,6 +19,7 @@ import com.hyungjun212naver.finedustproject.Activity.MainActivity;
  */
 
 public class AppController extends Application {
+
     public static final String TAG = AppController.class.getSimpleName();
     private RequestQueue mRequestQueue;
     private static AppController mInstance;
@@ -27,7 +28,6 @@ public class AppController extends Application {
     public void onCreate(){
         super.onCreate();
         mInstance = this;
-
     }
 
     public static synchronized AppController getInstance(){
@@ -74,4 +74,6 @@ public class AppController extends Application {
                 (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1,notification);
     }
+
+
 }

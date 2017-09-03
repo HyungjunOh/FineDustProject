@@ -92,14 +92,16 @@
             android:text="천식 여부 (Y/N)"
             android:textColor="@color/base_white"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <RadioGroup
             android:id="@+id/radioGroup"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="5dp"
-            android:background="@color/input_register_bg">
+            android:background="@color/input_register_bg"
+            android:visibility="gone">
 
             <RadioButton
                 android:id="@+id/radioButton_yes"

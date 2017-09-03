@@ -143,7 +143,7 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         RetrofitService api = RetroClient.getStationListService();
 
-        Call<StationList> call = api.getStation(String.valueOf(latitude), String.valueOf(longitude));
+        Call<StationList> call = api.getStation_Distance(String.valueOf(latitude), String.valueOf(longitude));
 
         call.enqueue(new Callback<StationList>() {
             @Override
@@ -255,6 +255,8 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         super.onDetach();
         mListener = null;
     }
+
+
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);

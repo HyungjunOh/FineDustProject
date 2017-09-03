@@ -1,12 +1,14 @@
 package com.hyungjun212naver.finedustproject.Fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +34,8 @@ import retrofit2.Response;
 
 public class BeaconSrcFragment extends Fragment {
 
+    Context mContext;
+
     private ArrayList<BeaconStation> beaconStationArrayList;
     private RecyclerView beaconSrc_1_rcView;
     private BeaconSrcAdapter mAdapter;
@@ -52,6 +56,11 @@ public class BeaconSrcFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mContext = new ContextThemeWrapper(getContext(), android.R.style.Theme_Holo_Light_Dialog);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            // API 24 이상일 경우 시스템 기본 테마 사용
+//            mContext = getContext();
+//        }
     }
 
     @Override
@@ -172,7 +181,7 @@ public class BeaconSrcFragment extends Fragment {
 
     private void BeaconSrcDialog(){
 
-        AlertDialog.Builder alt_bld = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder alt_bld = new AlertDialog.Builder(mContext);
 
         alt_bld.setMessage("측정시간 : " + time + "\n먼지값 : " + dust +
         "\n가스값 : " + gas);

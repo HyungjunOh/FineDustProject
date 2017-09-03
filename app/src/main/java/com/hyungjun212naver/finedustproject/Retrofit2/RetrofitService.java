@@ -27,8 +27,11 @@ public interface RetrofitService {
     @GET("/v2/local/geo/coord2regioncode.json")
     Call<GpsToAddr> getAddr(@Query("x") String x, @Query("y") String y);
 
+    @GET("/FineDustProject/stationlist.php")
+    Call<StationList> getStation();
+
     @GET("/FineDustProject/stationlist2.php")
-    Call<StationList> getStation(@Query("latitude") String latitude, @Query("longitude") String longitude);
+    Call<StationList> getStation_Distance(@Query("latitude") String latitude, @Query("longitude") String longitude);
 
     @GET("/FineDustProject/latest_airvalue.php")
     Call<AirValueJSON> getLatest_AirValue(@Query("stationName") String stationName);
@@ -44,4 +47,8 @@ public interface RetrofitService {
 
     @GET("/FineDustProject/latest_station_airvalue.php")
     Call<LatestStationData> getLatestStationData_AirValue();
+
+    @GET("/FineDustProject/graph_station_airvalue.php?")
+    Call<AirValueJSON> getGraph_Station_AirValue(@Query("stationName") String stationName, @Query("start_dateTime") String start_dateTime,
+                                                 @Query("end_dateTime") String end_dateTime);
 }
