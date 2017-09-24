@@ -18,13 +18,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.hyungjun212naver.finedustproject.Adapter.GraphOpt2Adapter;
 import com.hyungjun212naver.finedustproject.Adapter.GraphOptAdapter;
-import com.hyungjun212naver.finedustproject.Bean.AirValueJSON;
+import com.hyungjun212naver.finedustproject.Bean.AvgBeaconData;
+import com.hyungjun212naver.finedustproject.Bean.AvgStationData;
 import com.hyungjun212naver.finedustproject.Bean.BeaconLocation;
 import com.hyungjun212naver.finedustproject.Bean.BeaconLocation.BeaconStation;
 import com.hyungjun212naver.finedustproject.Bean.StationList;
@@ -45,6 +47,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.hyungjun212naver.finedustproject.App.AppConfig.LOGIN_NAME;
+
 
 public class GraphFragment extends Fragment implements View.OnClickListener {
 
@@ -54,7 +58,7 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
 
     Context mContext;
 
-    private Button graph_station_btn, graph_beacon_btn, graph_user_btn;
+    private Button graph_station_btn, graph_beacon_btn, graph_user_btn, graph_potable_search_btn;
     private RecyclerView graph_station_rV;
     private ConstraintLayout graph_opt_layout;
     private TextView graph_startDate_tV, graph_endDate_tV;
@@ -63,9 +67,13 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
     private GraphOpt2Adapter graphOpt2Adapter;
     private List<Station> stationList = null;
     private ArrayList<BeaconStation> beaconStationList = null;
-    private List<AirValueJSON.Airvalue> airvalueList = null;
+    private List<AvgStationData.AvgAirValue> avgAirValueList = null;
+    private List<AvgBeaconData.AvgAirValue> avgAirBeaconValueList = null;
+    private List<AvgBeaconData.AvgAirValue> avgAirPortableValueList = null;
 
+    String[] xValues;
     private LineChart chart;
+
 
     private long now = System.currentTimeMillis();
     Date date = new Date(now);
@@ -117,9 +125,11 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
         graph_station_btn = (Button)view.findViewById(R.id.graph_station_btn);
         graph_beacon_btn = (Button)view.findViewById(R.id.graph_beacon_btn);
         graph_user_btn = (Button)view.findViewById(R.id.graph_user_btn);
+        graph_potable_search_btn = (Button)view.findViewById(R.id.graph_potable_search_btn);
         graph_station_btn.setOnClickListener(this);
         graph_beacon_btn.setOnClickListener(this);
         graph_user_btn.setOnClickListener(this);
+        graph_potable_search_btn.setOnClickListener(this);
         graph_startDate_tV = (TextView)view.findViewById(R.id.graph_startDate_tV);
         graph_endDate_tV = (TextView)view.findViewById(R.id.graph_endDate_tV);
         graph_startDate_tV.setOnClickListener(this);
@@ -140,6 +150,7 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.graph_station_btn :
+                graph_potable_search_btn.setVisibility(View.GONE);
                 graph_station_rV.setVisibility(View.VISIBLE);
                 if(GRAPH_OPTION_STATE == false) {
                     GRAPH_OPTION_STATE = true;
@@ -153,6 +164,7 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.graph_beacon_btn :
+                graph_potable_search_btn.setVisibility(View.GONE);
                 graph_station_rV.setVisibility(View.VISIBLE);
                 if(GRAPH_OPTION_STATE == false) {
                     GRAPH_OPTION_STATE = true;
@@ -166,12 +178,14 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.graph_user_btn :
+                graph_potable_search_btn.setVisibility(View.VISIBLE);
                 if(GRAPH_OPTION_STATE == false) {
                     GRAPH_OPTION_STATE = true;
                     graph_opt_layout.setVisibility(View.VISIBLE);
                 } else if(GRAPH_OPTION_STATE == true && GRAPH_OPTION_CLICK == "user"){
                     GRAPH_OPTION_STATE = false;
                     graph_opt_layout.setVisibility(View.GONE);
+                    graph_potable_search_btn.setVisibility(View.VISIBLE);
                 }
                 graph_station_rV.setVisibility(View.GONE);
                 GRAPH_OPTION_CLICK = "user";
@@ -186,33 +200,51 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                 GRAPH_DATE_SELECT = "graph_endDate_tV";
                 new DatePickerDialog(mContext, dateSetListener, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 break;
+            case R.id.graph_potable_search_btn :
+                Log.e("graph_potable_search", LOGIN_NAME+"/"+graph_startDate_tV.getText().toString()+"/"+graph_endDate_tV.getText().toString());
+                searchPortable(LOGIN_NAME, graph_startDate_tV.getText().toString(), graph_endDate_tV.getText().toString());
+                break;
         }
     }
 
-    private void Graph_Station_AirValue(final String stationName, String start_dateTime, String end_dateTime){
+    private void Graph_Station_Avg_AirValue(final String stationName, String start_dateTime, String end_dateTime){
 
         RetrofitService api = RetroClient.getStationListService();
 
-        Call<AirValueJSON> call = api.getGraph_Station_AirValue(stationName, start_dateTime, end_dateTime);
+        Call<AvgStationData> call = api.getGraph_Station_Avg_AirValue(stationName, start_dateTime, end_dateTime);
 
-        call.enqueue(new Callback<AirValueJSON>() {
+        call.enqueue(new Callback<AvgStationData>() {
             @Override
-            public void onResponse(Call<AirValueJSON> call, Response<AirValueJSON> response) {
+            public void onResponse(Call<AvgStationData> call, Response<AvgStationData> response) {
 
                 if(response.isSuccessful()){
 
-                    airvalueList = response.body().getAirvalue();
+                    avgAirValueList = response.body().getAvgAirValue();
 
-                    for(int i=0; i<airvalueList.size(); i++){
-                        Log.e("graph", (i+1) + ": " + airvalueList.get(i).getKhaiValue());
+                    int count = 0;
+                    int dataCount = 0;
+
+                    for(int i=0; i<avgAirValueList.size(); i++){
+                        if(avgAirValueList.get(i).getAvgKhaiValue() != null) {
+                            dataCount++;
+                        }
                     }
+
+                    xValues = new String[dataCount];
 
                     chart.clear();
 
                     ArrayList<Entry> entries = new ArrayList<Entry>();
-                    for(int i=0; i<airvalueList.size(); i++){
-                        if(airvalueList.get(i).getKhaiValue() != null)
-                            entries.add(new Entry(i+1, Float.parseFloat(airvalueList.get(i).getKhaiValue())));
+
+                    for(int i=0; i<avgAirValueList.size(); i++){
+                        if(avgAirValueList.get(i).getAvgKhaiValue() != null) {
+                            Log.e("graph", count+"------------------");
+                            xValues[count] = avgAirValueList.get(i).getDateTime();
+                            Log.e("graph",  "x"+ count + " : " + xValues[count]);
+                            entries.add(new Entry(count, Float.parseFloat(avgAirValueList.get(i).getAvgKhaiValue())));
+                            Log.e("graph", "y"+ count + " : " + avgAirValueList.get(i).getAvgKhaiValue());
+                            count++;
+                        }
                     }
 
                     LineDataSet setComp1 = new LineDataSet(entries, stationName);
@@ -221,11 +253,14 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                     setComp1.setDrawFilled(true); //선 아래 색상 표시
                     setComp1.setDrawValues(false);
 
+                    XAxis xAxis = chart.getXAxis();
+//                    xAxis.setValueFormatter(new MyXAxisValueFormatter(xValues));
+                    xAxis.setGranularity(1f);
+
                     LineData lineData = new LineData(setComp1);
                     chart.setData(lineData);
                     chart.setScaleEnabled(false);
                     chart.invalidate();
-
 
                 } else {
                     Toast.makeText(getContext(), "worng", Toast.LENGTH_SHORT).show();
@@ -233,7 +268,74 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onFailure(Call<AirValueJSON> call, Throwable t) {
+            public void onFailure(Call<AvgStationData> call, Throwable t) {
+                Toast.makeText(getContext(), "connection error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void Graph_Beacon_Avg_AirValue(final String beacon, String start_dateTime, String end_dateTime){
+
+        RetrofitService api = RetroClient.getStationListService();
+
+        Call<AvgBeaconData> call = api.getGraph_Beacon_Avg_AirValue(beacon, start_dateTime, end_dateTime);
+
+        call.enqueue(new Callback<AvgBeaconData>() {
+            @Override
+            public void onResponse(Call<AvgBeaconData> call, Response<AvgBeaconData> response) {
+
+                if(response.isSuccessful()){
+
+                    avgAirBeaconValueList = response.body().getAvgAirValue();
+
+                    int count = 0;
+                    int dataCount = 0;
+
+                    for(int i=0; i<avgAirBeaconValueList.size(); i++){
+                        if(avgAirBeaconValueList.get(i).getAvgDust() != null) {
+                            dataCount++;
+                        }
+                    }
+
+                    xValues = new String[dataCount];
+
+                    chart.clear();
+
+                    ArrayList<Entry> entries = new ArrayList<Entry>();
+
+                    for(int i=0; i<avgAirBeaconValueList.size(); i++){
+                        if(avgAirBeaconValueList.get(i).getAvgDust() != null) {
+                            Log.e("graph", count+"------------------");
+                            xValues[count] = avgAirBeaconValueList.get(i).getMTime();
+                            Log.e("graph",  "x"+ count + " : " + xValues[count]);
+                            entries.add(new Entry(count, Float.parseFloat(avgAirBeaconValueList.get(i).getAvgDust())));
+                            Log.e("graph", "y"+ count + " : " + avgAirBeaconValueList.get(i).getAvgDust());
+                            count++;
+                        }
+                    }
+
+                    LineDataSet setComp1 = new LineDataSet(entries, beacon);
+                    setComp1.setCircleColors(ColorTemplate.VORDIPLOM_COLORS);
+                    setComp1.setDrawCircles(true);
+                    setComp1.setDrawFilled(true); //선 아래 색상 표시
+                    setComp1.setDrawValues(false);
+
+                    XAxis xAxis = chart.getXAxis();
+//                    xAxis.setValueFormatter(new MyXAxisValueFormatter(xValues));
+                    xAxis.setGranularity(1f);
+
+                    LineData lineData = new LineData(setComp1);
+                    chart.setData(lineData);
+                    chart.setScaleEnabled(false);
+                    chart.invalidate();
+
+                } else {
+                    Toast.makeText(getContext(), "worng", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AvgBeaconData> call, Throwable t) {
                 Toast.makeText(getContext(), "connection error", Toast.LENGTH_SHORT).show();
             }
         });
@@ -265,7 +367,7 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                         @Override
                         public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
-                            Graph_Station_AirValue(stationList.get(position).getStationName(), graph_startDate_tV.getText().toString()+" 00:00:00", graph_endDate_tV.getText().toString()+" 23:59:59");
+                            Graph_Station_Avg_AirValue(stationList.get(position).getStationName(), graph_startDate_tV.getText().toString(), graph_endDate_tV.getText().toString());
 
                         }
                     });
@@ -306,7 +408,11 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
                         @Override
                         public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
+                            Graph_Beacon_Avg_AirValue(beaconStationList.get(position).getId(), graph_startDate_tV.getText().toString(), graph_endDate_tV.getText().toString());
+
                             Log.e("onItemClick", beaconStationList.get(position).getLocationName());
+                            Log.e("onItemClick", beaconStationList.get(position).getId());
+
                         }
                     });
 
@@ -321,6 +427,73 @@ public class GraphFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+    }
+
+    private void searchPortable(final String user_id, String start_dateTime, String end_dateTime){
+
+        RetrofitService api = RetroClient.getStationListService();
+
+        Call<AvgBeaconData> call = api.getGraph_Portable_Avg_AirValue(user_id, start_dateTime, end_dateTime);
+
+        call.enqueue(new Callback<AvgBeaconData>() {
+            @Override
+            public void onResponse(Call<AvgBeaconData> call, Response<AvgBeaconData> response) {
+
+                if(response.isSuccessful()){
+
+                    avgAirPortableValueList = response.body().getAvgAirValue();
+
+                    int count = 0;
+                    int dataCount = 0;
+
+                    for(int i=0; i<avgAirPortableValueList.size(); i++){
+                        if(avgAirPortableValueList.get(i).getAvgDust() != null) {
+                            dataCount++;
+                        }
+                    }
+
+                    xValues = new String[dataCount];
+
+                    chart.clear();
+
+                    ArrayList<Entry> entries = new ArrayList<Entry>();
+
+                    for(int i=0; i<avgAirPortableValueList.size(); i++){
+                        if(avgAirPortableValueList.get(i).getAvgDust() != null) {
+                            Log.e("graph", count+"------------------");
+                            xValues[count] = avgAirPortableValueList.get(i).getMTime();
+                            Log.e("graph",  "x"+ count + " : " + xValues[count]);
+                            entries.add(new Entry(count, Float.parseFloat(avgAirPortableValueList.get(i).getAvgDust())));
+                            Log.e("graph", "y"+ count + " : " + avgAirPortableValueList.get(i).getAvgDust());
+                            count++;
+                        }
+                    }
+
+                    LineDataSet setComp1 = new LineDataSet(entries, user_id);
+                    setComp1.setCircleColors(ColorTemplate.VORDIPLOM_COLORS);
+                    setComp1.setDrawCircles(true);
+                    setComp1.setDrawFilled(true); //선 아래 색상 표시
+                    setComp1.setDrawValues(false);
+
+                    XAxis xAxis = chart.getXAxis();
+//                    xAxis.setValueFormatter(new MyXAxisValueFormatter(xValues));
+                    xAxis.setGranularity(1f);
+
+                    LineData lineData = new LineData(setComp1);
+                    chart.setData(lineData);
+                    chart.setScaleEnabled(false);
+                    chart.invalidate();
+
+                } else {
+                    Toast.makeText(getContext(), "worng", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AvgBeaconData> call, Throwable t) {
+                Toast.makeText(getContext(), "connection error", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateLabel_date(TextView textView){

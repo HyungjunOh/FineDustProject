@@ -2,9 +2,13 @@ package com.hyungjun212naver.finedustproject.Retrofit2;
 
 import com.hyungjun212naver.finedustproject.App.AppConfig;
 import com.hyungjun212naver.finedustproject.Bean.AirValueJSON;
+import com.hyungjun212naver.finedustproject.Bean.AvgBeaconData;
+import com.hyungjun212naver.finedustproject.Bean.AvgStationData;
 import com.hyungjun212naver.finedustproject.Bean.BeaconAirValue;
 import com.hyungjun212naver.finedustproject.Bean.BeaconLocation;
+import com.hyungjun212naver.finedustproject.Bean.BeaconSrcToId;
 import com.hyungjun212naver.finedustproject.Bean.GpsToAddr;
+import com.hyungjun212naver.finedustproject.Bean.InsertBeaconData;
 import com.hyungjun212naver.finedustproject.Bean.LatestBeaconData;
 import com.hyungjun212naver.finedustproject.Bean.LatestStationData;
 import com.hyungjun212naver.finedustproject.Bean.StationList;
@@ -39,6 +43,9 @@ public interface RetrofitService {
     @GET("/FineDustProject/beacon_location.php")
     Call<BeaconLocation> getBeacon_Location(@Query("beaconLocation_Name") String beaconLocation_Name);
 
+    @GET("/FineDustProject/beacon_location_id.php")
+    Call<BeaconSrcToId> getBeacon_Location_Id(@Query("id") String id);
+
     @GET("/FineDustProject/beacon_data.php")
     Call<BeaconAirValue> getBeacon_AirValue(@Query("beacon_id") String beacon_id, @Query("count") String count);
 
@@ -51,4 +58,19 @@ public interface RetrofitService {
     @GET("/FineDustProject/graph_station_airvalue.php?")
     Call<AirValueJSON> getGraph_Station_AirValue(@Query("stationName") String stationName, @Query("start_dateTime") String start_dateTime,
                                                  @Query("end_dateTime") String end_dateTime);
+
+    @GET("/FineDustProject/graph_station_avg_airvalue.php?")
+    Call<AvgStationData> getGraph_Station_Avg_AirValue(@Query("stationName") String stationName, @Query("start_dateTime") String start_dateTime,
+                                                       @Query("end_dateTime") String end_dateTime);
+
+    @GET("/FineDustProject/graph_beacon_avg_airvalue.php?")
+    Call<AvgBeaconData> getGraph_Beacon_Avg_AirValue(@Query("beacon_id") String beacon_id, @Query("start_dateTime") String start_dateTime,
+                                                      @Query("end_dateTime") String end_dateTime);
+
+    @GET("/FineDustProject/graph_portable_avg_airvalue.php?")
+    Call<AvgBeaconData> getGraph_Portable_Avg_AirValue(@Query("user_id") String user_id, @Query("start_dateTime") String start_dateTime,
+                                                     @Query("end_dateTime") String end_dateTime);
+
+    @GET("/FineDustProject/insert_beacon_data.php?")
+    Call<InsertBeaconData> insert_Beacon_Data(@Query("id") String id, @Query("dust") String dust, @Query("gas") String gas);
 }

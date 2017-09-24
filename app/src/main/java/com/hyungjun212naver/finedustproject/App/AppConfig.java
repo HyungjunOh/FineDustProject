@@ -5,7 +5,7 @@ package com.hyungjun212naver.finedustproject.App;
  */
 
 public class AppConfig {
-    public static String IP = "172.30.98.2";
+    public static String IP = "192.168.0.5";
 
     public static String URL_LOGIN = "http://"+IP+"/AD_Project/login.php";
     public static String URL_REGISTER = "http://"+IP+"/AD_Project/register.php";

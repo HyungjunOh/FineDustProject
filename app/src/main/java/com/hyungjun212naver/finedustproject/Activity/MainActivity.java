@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     //Beacon
     private BeaconManager beaconManager;
-    Identifier defaultUUID = Identifier.parse("aaaaaaaa-bbbb-bbbb-cccc-ccccdddddddd");
+    Identifier defaultUUID = Identifier.parse("aaaaaaaa-bbbb-bbbb-cccc-cccc00000015");
 
     public static String UUID;
     public static String Major;
@@ -416,20 +416,21 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     @Override
     public void onBeaconServiceConnect() {
 
-        beaconManager.setRangeNotifier(new RangeNotifier() {
+        beaconManager.addRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 if (beacons.size() > 0) {
                     BEACON_STATE = true;
                     Log.e("BEACON_STATE", "TRUE");
-
                     Log.e(TAG, "--------------------------------------------------------------------------------");
                     Log.i(TAG, "Distance : "+beacons.iterator().next().getDistance()+"(meter)");
                     UUID = beacons.iterator().next().getId1().toString();
                     Log.i(TAG, "UUID : "+UUID);
-                    Major = beacons.iterator().next().getId2().toString();
+                    int Major_10 = Integer.parseInt(beacons.iterator().next().getId2().toString());
+                    Major = Integer.toHexString(Major_10);
                     Log.i(TAG, "Major : "+Major);
-                    Minor = beacons.iterator().next().getId3().toString();
+                    int Minor_10 = Integer.parseInt(beacons.iterator().next().getId3().toString());
+                    Minor = Integer.toHexString(Minor_10);
                     Log.i(TAG, "Minor : "+Minor);
                     Log.e(TAG, "--------------------------------------------------------------------------------");
                 } else {
